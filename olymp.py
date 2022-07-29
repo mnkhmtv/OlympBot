@@ -1,12 +1,32 @@
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+import logging
+import argparse
 
-async def hello(update: Update, context: ContextTypes):
-    await update.message.reply_text(f'Hello {update.effective_user.first_name}')
+import telegram.ext as tg_ext
+
+from bot import handlers
 
 
-app = ApplicationBuilder().token("5399754914:AAGibcVpZenT-4FKKkMvz_2QWq7sY-XHV7Y").build()
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+)
+logger = logging.getLogger(__name__)
 
-app.add_handler(CommandHandler("hello", hello))
 
-app.run_polling( )
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--token', type=str, required=True)
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    application = tg_ext.Application.builder().token(args.token).build()
+
+    handlers.setup_handlers(application)
+
+    application.run_polling()
+
+
+if __name__ == "__main__":
+    main()
